@@ -119,7 +119,7 @@ public:  // with description
     // Add a "cell" together with a importance value to the store.
 
   void ChangeImportance(G4double importance,
-			const G4GeometryCell &gCell);
+                         const G4GeometryCell &gCell);
   void ChangeImportance(G4double importance,
 			const G4VPhysicalVolume &,
 			G4int aRepNum = 0);
@@ -131,7 +131,6 @@ public:  // with description
 private:
 
   G4bool IsInWorld(const G4VPhysicalVolume &) const;
-  void SetInternalIterator(const G4GeometryCell &gCell) const;
   void Error(const G4String &m) const;
   
 private:
@@ -140,8 +139,6 @@ private:
   //  const G4VPhysicalVolume* fParallelWorldVolume;
   //  G4bool fParaFlag;
   G4GeometryCellImportance fGeometryCelli;
-
-  mutable G4GeometryCellImportance::const_iterator fCurrentIterator;
 
   static G4ThreadLocal G4IStore* fInstance;
 };

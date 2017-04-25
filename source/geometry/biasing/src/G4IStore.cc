@@ -95,11 +95,6 @@ const G4VPhysicalVolume* G4IStore::GetParallelWorldVolumePointer() const
   return fWorldVolume;
 }
 
-void G4IStore::SetInternalIterator(const G4GeometryCell &gCell) const
-{
-  fCurrentIterator = fGeometryCelli.find(gCell);
-}
-
 void G4IStore::AddImportanceGeometryCell(G4double importance,
 			 const G4GeometryCell &gCell)
 {
@@ -109,8 +104,9 @@ void G4IStore::AddImportanceGeometryCell(G4double importance,
   if (!IsInWorld(gCell.GetPhysicalVolume()) ) {
     Error("AddImportanceGeometryCell() - Physical volume not found!");
   }
-  SetInternalIterator(gCell);
-  if (fCurrentIterator!=fGeometryCelli.end()) {
+  G4GeometryCellImportance::const_iterator gCellIterator;
+  gCellIterator = fGeometryCelli.find(gCell);
+  if (gCellIterator!=fGeometryCelli.end()) {
     Error("AddImportanceGeometryCell() - Region already existing!");
   }
   fGeometryCelli[gCell] = importance;
@@ -132,8 +128,9 @@ void G4IStore::ChangeImportance(G4double importance,
   if (!IsInWorld(gCell.GetPhysicalVolume()) ) {
     Error("ChangeImportance() - Physical volume not found!");
   }
-  SetInternalIterator(gCell);
-  if (fCurrentIterator==fGeometryCelli.end()) {
+  G4GeometryCellImportance::const_iterator gCellIterator;
+  gCellIterator = fGeometryCelli.find(gCell);
+  if (gCellIterator==fGeometryCelli.end()) {
     Error("ChangeImportance() - Region does not exist!");
   }
   fGeometryCelli[gCell] = importance;
@@ -149,20 +146,23 @@ void G4IStore::ChangeImportance(G4double importance,
 G4double G4IStore::GetImportance(const G4VPhysicalVolume &aVolume,
 				 G4int aRepNum) const
 {  
-  SetInternalIterator(G4GeometryCell(aVolume, aRepNum));
-  G4GeometryCellImportance::const_iterator gCellIterator = fCurrentIterator;
+  G4GeometryCell gCell = G4GeometryCell(aVolume, aRepNum);
+  G4GeometryCellImportance::const_iterator gCellIterator;
+  gCellIterator = fGeometryCelli.find(gCell);
+
   if (gCellIterator==fGeometryCelli.end()) {
     Error("GetImportance() - Region does not exist!");
     return 0.;
   }
-  return (*fCurrentIterator).second;
+  return (*gCellIterator).second;
 }
 
 
 G4double G4IStore::GetImportance(const G4GeometryCell &gCell) const
 {
-  SetInternalIterator(gCell);
-  G4GeometryCellImportance::const_iterator gCellIterator = fCurrentIterator;
+  G4GeometryCellImportance::const_iterator gCellIterator;
+  gCellIterator = fGeometryCelli.find(gCell);
+
   if (gCellIterator==fGeometryCelli.end()) {
     std::ostringstream err_mess;
     err_mess << "GetImportance() - Region does not exist!" << G4endl
@@ -171,15 +171,16 @@ G4double G4IStore::GetImportance(const G4GeometryCell &gCell) const
     Error(err_mess.str());
     return 0.;
   }
-  return (*fCurrentIterator).second;
+  return (*gCellIterator).second;
 }
 
 G4bool G4IStore::IsKnown(const G4GeometryCell &gCell) const {
   G4bool inWorldKnown(IsInWorld(gCell.GetPhysicalVolume()));
 		      
   if ( inWorldKnown ) {
-    SetInternalIterator(gCell);
-    inWorldKnown = (fCurrentIterator!=fGeometryCelli.end());
+    G4GeometryCellImportance::const_iterator gCellIterator;
+    gCellIterator = fGeometryCelli.find(gCell);
+    inWorldKnown = (gCellIterator!=fGeometryCelli.end());
   }
   return inWorldKnown;
 }
